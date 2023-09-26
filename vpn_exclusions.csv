@@ -1,0 +1,3 @@
+protocol,port,destination
+any,any,67.215.64.0/19
+dns,,ocsp.int-x3.letsencrypt.org
