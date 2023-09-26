@@ -37,7 +37,7 @@ ORG_NAME = ""
 3. Add name of CSV File with exclusions to `config.py` (please place the file in the same directory)
 ```python
 # CSV Section
-CSV_FILE = "vpn_exclusions-example.csv"
+CSV_FILE = "vpn_exclusions.csv"
 ```
 4. Set up a Python virtual environment. Make sure Python 3 is installed in your environment, and if not, you may download Python [here](https://www.python.org/downloads/). Once Python 3 is installed in your environment, you can activate the virtual environment with the instructions found [here](https://docs.python.org/3/tutorial/venv.html).
 5. Install the requirements with `pip3 install -r requirements.txt`
