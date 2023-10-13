@@ -1,6 +1,10 @@
 # Meraki VPN Exclusion Rule Updates
 
 This script creates [VPN Exclusion Rules](https://documentation.meraki.com/MX/Site-to-site_VPN/VPN_Full-Tunnel_Exclusion_(Application_and_IP%2F%2FURL_Based_Local_Internet_Breakout)) for all appliance networks in an organization that are a part of a Site-to-Site VPN fabric. The rules are built from components in a CSV file and represent traffic destinations that should be routed to the local internet and not the VPN tunnels.
+
+Currently, only **Custom VPN Exclusion** creation is supported (not **Major Applications**).
+
+Note: The default behavior is to overwrite existing VPN Exclusion Rules. This can be changed by setting the appropriate config parameter `OVERWRITE`
 ## Contacts
 * Trevor Maco
 
@@ -39,8 +43,13 @@ ORG_NAME = ""
 # CSV Section
 CSV_FILE = "vpn_exclusions.csv"
 ```
-4. Set up a Python virtual environment. Make sure Python 3 is installed in your environment, and if not, you may download Python [here](https://www.python.org/downloads/). Once Python 3 is installed in your environment, you can activate the virtual environment with the instructions found [here](https://docs.python.org/3/tutorial/venv.html).
-5. Install the requirements with `pip3 install -r requirements.txt`
+4. The default behavior is overwriting existing Exclusion Rules. This can be adjusted with the `OVERWRITE` parameter in `config.py`
+```python
+# Script Behavior
+OVERWRITE = True
+```
+5. Set up a Python virtual environment. Make sure Python 3 is installed in your environment, and if not, you may download Python [here](https://www.python.org/downloads/). Once Python 3 is installed in your environment, you can activate the virtual environment with the instructions found [here](https://docs.python.org/3/tutorial/venv.html).
+6. Install the requirements with `pip3 install -r requirements.txt`
 
 ## Usage
 To run the program, use the command:

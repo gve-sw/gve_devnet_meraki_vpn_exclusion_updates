@@ -3,4 +3,7 @@ API_KEY = ""
 ORG_NAME = ""
 
 # CSV Section
-CSV_FILE = ""
+CSV_FILE = "vpn_exclusions.csv"
+
+# Script Behavior
+OVERWRITE = True

@@ -81,27 +81,38 @@ def create_exclusions(csv_file_name):
     return custom_exclusions
 
 
-def add_exclusions_to_network(networks, custom_exclusions):
+def add_exclusions_to_network(networks, custom_exclusions, existing_rules):
     """
     Add VPN exclusions to each network in organization
+    :param existing_rules: existing_rules (custom) for each network
     :param networks: Organization networks
     :param custom_exclusions: VPN exclusions (Meraki format)
     """
     with Progress() as progress:
         overall_progress = progress.add_task("Overall Progress", total=len(networks), transient=True)
         counter = 1
+        new_exclusion_count = len(custom_exclusions)
 
         for network in networks:
             progress.console.print(
                 "Processing Network: [blue]{}[/] ({} of {})".format(network['name'], str(counter), len(networks)))
 
             try:
+                # Define new vpn exclusions and major app's we are going to add to the network
+                new_exclusions = custom_exclusions
+                new_majorApplications = []
+
+                # Grab existing Rules (if present, no networks will be present if overwrite set to True)
+                if network['id'] in existing_rules:
+                    new_exclusions += existing_rules[network['id']]['custom']
+                    new_majorApplications += existing_rules[network['id']]['majorApplications']
+
                 # Add VPN exclusions to network
                 response = dashboard.appliance.updateNetworkApplianceTrafficShapingVpnExclusions(network['id'],
-                                                                                                 custom=custom_exclusions,
-                                                                                                 majorApplications=None
+                                                                                                 custom=new_exclusions,
+                                                                                                 majorApplications=new_majorApplications
                                                                                                  )
-                progress.console.print(f"[green]Successfully added {len(custom_exclusions)} exclusion rules![/]")
+                progress.console.print(f"[green]Successfully added {new_exclusion_count} new exclusion rules![/]")
             except APIError as e:
                 progress.console.print(f'[red]Error: {str(e)}[/]')
 
@@ -125,6 +136,17 @@ def main():
 
     console.print(f"Found {len(networks)} Appliance Networks")
 
+    # Get Existing Rules (Prevent Overwrite if Parameter Set)
+    existing_rules = {}
+    if not config.OVERWRITE:
+        console.print(Panel.fit("Gathering Existing VPN Custom Exclusions", title="Step 2a"))
+        response = dashboard.appliance.getOrganizationApplianceTrafficShapingVpnExclusionsByNetwork(org_id, total_pages='all')
+
+        for network_rules in response['items']:
+            existing_rules[network_rules['networkId']] = {'custom': network_rules['custom'], 'majorApplications': network_rules['majorApplications']}
+
+        console.print(f'Existing exclusions found: {existing_rules}')
+
     # Read data from CSV, create exclusion rule payloads in the proper format
     console.print(Panel.fit("Creating VPN Custom Exclusions", title="Step 3"))
     custom_exclusions = create_exclusions(config.CSV_FILE)
@@ -133,7 +155,7 @@ def main():
 
     # Add custom exclusions to each network
     console.print(Panel.fit("Adding VPN Custom Exclusions to Networks", title="Step 4"))
-    add_exclusions_to_network(networks, custom_exclusions)
+    add_exclusions_to_network(networks, custom_exclusions, existing_rules)
 
 
 if __name__ == "__main__":
